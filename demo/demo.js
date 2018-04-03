@@ -25,6 +25,20 @@ export default class Demo extends Component {
     this.handleAudioProcess = this.handleAudioProcess.bind(this);
     this.handlePlayToggle = this.handlePlayToggle.bind(this);
     this.toggleLightMode = this.toggleLightMode.bind(this);
+
+    this.oneStep={
+        step: 0,
+        duration: 1,
+        A:0,
+        B:0,
+        C:0,
+        D:0,
+        Asharp:0,
+        Bsharp:0,
+        Csharp:0,
+        Dsharp:0
+    };
+
   }
   handleAudioProcess(analyser) {
     this.visualization.audioProcess(analyser);
@@ -37,7 +51,41 @@ export default class Demo extends Component {
   toggleLightMode(){
     this.setState({lightMode: !this.state.lightMode});
   }
+
+  createOctave(tone,step,sharp){
+    return `${tone}${step}${sharp==1?"#":''}`;
+  }
+
   render() {
+    const data = "TCGTGGAGCGATTTGTCTGCTTGATTGCGATAACGAACGAGATTTCCAGTCTTTGTTCTGCGGTGGCCTTCACTAGCGGCTTCGGCTGCTGGCTGCGGGCTATCGTAGACTAAGGCTACAGACAGCATTAAAGCTGTACGAGAGGGAGCAATAACA";
+    const mData = data.split("").map(item=>{
+        let tone;
+        switch(item){
+            case "T" : tone = "A";break;
+            case "C" : tone = "B";break;
+            case "G" : tone = "C";break;
+            case "A" : tone = "D";break;
+            default: tone = "A";
+        }
+        if(this.oneStep[tone]>=4) {
+            if(this.oneStep[`${tone}sharp`]==1){
+                this.oneStep[tone]=1;
+                this.oneStep[`${tone}sharp`]=0;
+            }else{
+                this.oneStep[tone]=1;
+                this.oneStep[`${tone}sharp`]=1;
+            }
+        }else{
+            this.oneStep[tone]++;
+        }
+        this.oneStep.step++;
+        if(this.oneStep.step>30) this.oneStep.step=1;
+        return [
+            this.oneStep.step,
+            2,
+            [this.createOctave(tone.toLowerCase(),this.oneStep[tone],this.oneStep[`${tone}sharp`])]
+        ];
+    });
     return (
       <div style={this.state.lightMode ? {
         paddingTop: '30px'
@@ -54,53 +102,13 @@ export default class Demo extends Component {
           <Analyser onAudioProcess={this.handleAudioProcess}>
             <Sequencer
               resolution={16}
-              bars={1}
-            >
-              <Sampler
-                sample="samples/kick.wav"
-                steps={[0, 2, 8, 10]}
-              />
-              <Sampler
-                sample="samples/snare.wav"
-                steps={[4, 12]}
-              />
-            </Sequencer>
-            <Sequencer
-              resolution={16}
               bars={2}
             >
               <Polysynth
-                steps={[
-                  [0, 1, ['c3', 'd#3', 'g3' ]],
-                  [2, 1, ['c4']],
-                  [8, 1, ['c3', 'd#3', 'g3']],
-                  [10, 1, ['c4']],
-                  [12, 1, ['c3', 'd#3', 'g3']],
-                  [14, 1, ['d#4']],
-                  [16, 1, ['f3', 'g#3', 'c4']],
-                  [18, 1, ['f3', 'g#3', 'c4']],
-                  [24, 1, ['f3', 'g#3', 'c4']],
-                  [26, 1, ['f3', 'g#3', 'c4']],
-                  [28, 1, ['f3', 'g#3', 'c4']],
-                  [30, 1, ['f3', 'g#3', 'c4']],
-                ]}
+                steps={mData}
               />
             </Sequencer>
-            <Sequencer
-              resolution={16}
-              bars={2}
-            >
-              <Synth
-                type="sine"
-                steps={[
-                  [0, 8, 'c2'],
-                  [8, 4, 'c2'],
-                  [12, 4, 'd#2'],
-                  [16, 8, 'f2'],
-                  [24, 8, 'f1'],
-                ]}
-              />
-            </Sequencer>
+            
           </Analyser>
         </Song>
 

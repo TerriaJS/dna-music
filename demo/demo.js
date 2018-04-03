@@ -27,7 +27,9 @@ export default class Demo extends Component {
     componentDidMount() {
         Papa.parse(csvUrl, {
             download: true,
+            header: true,
             complete: result => {
+                console.log(result);
                 this.setState({ csv: result });
             }
         });

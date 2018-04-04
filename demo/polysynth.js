@@ -1,21 +1,30 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Delay, MoogFilter, Reverb, Synth, Chorus, PingPong } from "../src";
+import {
+    Delay,
+    MoogFilter,
+    Reverb,
+    Synth,
+    Chorus,
+    PingPong,
+    Overdrive
+} from "../src";
 
 const Polysynth = props => {
     const effectLookup = {
         Chorus,
-        PingPong
+        PingPong,
+        Overdrive,
+        Reverb
     };
 
-    console.log(props.effect);
-    const Effect = effectLookup[props.effect];
+    // const Effect = effectLookup[props.effect];
 
     return (
-        <Effect>
+        // <Effect outputGain={0.1} drive={0.1}>
             <Synth type="sine" steps={props.steps} />
-        </Effect>
+        // </Effect>
     );
 };
 

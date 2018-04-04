@@ -43,8 +43,12 @@ export default class Demo extends Component {
 
     getEffect() {
         switch (this.state.animal.Kingdom) {
-            case "fungi":
+            case "Fungi":
                 return "PingPong";
+            case "Eukaryota_uK":
+                return "Overdrive";
+            case "Metazoa":
+                return "Reverb";
             default:
                 return "Chorus";
         }
@@ -58,7 +62,8 @@ export default class Demo extends Component {
                 this.setState({
                     animals: _(result.data)
                         .filter(animal => animal.sequence)
-                        .take(10)
+                        .uniqBy(animal => animal.Kingdom)
+                        .take(20)
                         .value()
                 });
                 this.setAnimal(0);

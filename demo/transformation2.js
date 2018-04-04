@@ -31,7 +31,7 @@ const mappings={
 };
 
 function createOctave(tone,step,sharp){
-    return `${tone}${step}${sharp==1?"#":''}`;
+    return `${tone}${sharp==1?"#":''}${step}`;
 }
 
 export const string2Octave=function(data){

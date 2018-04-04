@@ -26,6 +26,9 @@ module.exports = {
     }, {
       test: /\.css$/,
       loader: 'style!css!postcss',
+    }, {
+      test: /\.csv$/,
+      loader: 'file',
     }],
   },
 };

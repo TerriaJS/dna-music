@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { Analyser, Song, Sequencer, Sampler, Synth } from "../src";
+import { Analyser, Song, Sequencer, Sampler, Synth, Monosynth } from "../src";
 
 import Polysynth from "./polysynth";
 import Visualization from "./visualization";
@@ -49,7 +49,7 @@ export default class Demo extends Component {
     }
     render() {
         if(!this.state.csv || !this.state.csv.data) return null;
-        const mData = string2Octave(this.state.csv.data.slice(0,100).reduce(function(prev,item){
+        const mData = string2Octave(this.state.csv.data.slice(0,2).reduce(function(prev,item){
             prev+=item['sequence'];
             return prev;
         },""));
@@ -79,7 +79,7 @@ export default class Demo extends Component {
                     <Analyser onAudioProcess={this.handleAudioProcess}>
                         <Sequencer resolution={16} bars={2}>
                             <Synth
-                                type="sine"
+                                type="square"
                                 steps={mData}
                             />
                         </Sequencer>

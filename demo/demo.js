@@ -34,12 +34,11 @@ export default class Demo extends Component {
 
         this.state = {
             playing: true,
-            lightMode: true
+            animals: []
         };
 
         this.handleAudioProcess = this.handleAudioProcess.bind(this);
         this.handlePlayToggle = this.handlePlayToggle.bind(this);
-        this.toggleLightMode = this.toggleLightMode.bind(this);
     }
 
     componentDidMount() {
@@ -48,99 +47,100 @@ export default class Demo extends Component {
             header: true,
             complete: result => {
                 this.setState({
-                    csv: _(result.data)
+                    animals: _(result.data)
                         .filter(animal => animal.sequence)
                         .take(10)
-                        .flatMap(animal => animal.sequence.match(/.{1,2}/g))
                         .value()
                 });
+                this.setAnimal(0);
             }
         });
+    }
+
+    onDropdownChange(event) {
+        this.setAnimal(event.target.selectedIndex);
+    }
+
+    setAnimal(animalIndex) {
+        this.setState({
+            playing: false
+        });
+
+        setTimeout(() => {
+            this.setState({
+                playing: true,
+                animal: this.state.animals[animalIndex],
+                music: this.state.animals[animalIndex].sequence.match(/.{1,2}/g)
+            });
+        }, 1000);
     }
 
     handleAudioProcess(analyser) {
         this.visualization.audioProcess(analyser);
     }
+
     handlePlayToggle() {
         this.setState({
             playing: !this.state.playing
         });
     }
-    toggleLightMode() {
-        this.setState({ lightMode: !this.state.lightMode });
-    }
+
     render() {
-        console.log(this.state.csv);
-        return this.state.csv ? (
-            <div
-                style={
-                    this.state.lightMode
-                        ? {
-                              paddingTop: "30px"
-                          }
-                        : {
-                              backgroundColor: "#000",
-                              width: "100%",
-                              height: "100%",
-                              paddingTop: "30px"
-                          }
-                }
-            >
-                <Song playing={this.state.playing} tempo={140}>
-                    <Analyser onAudioProcess={this.handleAudioProcess}>
-                        <Sequencer resolution={16} bars={1}>
-                            <Sampler
-                                sample="samples/kick.wav"
-                                steps={[0, 2, 8, 10]}
-                            />
-                            <Sampler
-                                sample="samples/snare.wav"
-                                steps={[4, 12]}
-                            />
-                        </Sequencer>
-                        <Sequencer resolution={16} bars={16}>
-                            <Polysynth
-                                steps={_(this.state.csv)
-                                    .take(128)
-                                    .map((pair, index) => {
+        const treble = _(this.state.music)
+            .drop(4)
+            .value();
+
+        return (
+            <div>
+                {this.state.music ? (
+                    <Song playing={this.state.playing} tempo={140}>
+                        <Analyser onAudioProcess={this.handleAudioProcess}>
+                            <Sequencer resolution={16} bars={1}>
+                                <Sampler
+                                    sample="samples/kick.wav"
+                                    steps={[0, 2, 8, 10]}
+                                />
+                                <Sampler
+                                    sample="samples/snare.wav"
+                                    steps={[4, 12]}
+                                />
+                            </Sequencer>
+                            <Sequencer
+                                resolution={16}
+                                bars={Math.ceil(treble.length / 8)}
+                            >
+                                <Polysynth
+                                    steps={treble.map((pair, index) => {
                                         return [index * 2, 1, lookup[pair]];
-                                    })
-                                    .value()}
-                            />
-                        </Sequencer>
-                        <Sequencer resolution={2} bars={2}>
-                            <Synth
-                                type="sine"
-                                steps={_(this.state.csv)
-                                    .drop(128)
-                                    .take(4)
-                                    .map((pair, index) => {
-                                        return [index, 1, bassLookup[pair]];
-                                    })
-                                    .value()}
-                            />
-                        </Sequencer>
-                    </Analyser>
-                </Song>
+                                    })}
+                                />
+                            </Sequencer>
+                            <Sequencer resolution={2} bars={2}>
+                                <Synth
+                                    type="sine"
+                                    steps={_(this.state.music)
+                                        .take(4)
+                                        .map((pair, index) => {
+                                            return [index, 1, bassLookup[pair]];
+                                        })
+                                        .value()}
+                                />
+                            </Sequencer>
+                        </Analyser>
+                    </Song>
+                ) : null}
 
                 <div style={{ textAlign: "center" }}>
-                    <p
-                        style={
-                            this.state.lightMode
-                                ? { color: "black" }
-                                : { color: "white" }
-                        }
-                    >
-                        Light Mode
-                    </p>
-                    <label className="switch">
-                        <input
-                            type="checkbox"
-                            onChange={this.toggleLightMode}
-                            checked={this.state.lightMode}
-                        />
-                        <div className="slider round" />
-                    </label>
+                    Animal:
+                    <select onChange={this.onDropdownChange.bind(this)}>
+                        {this.state.animals.map(animal => {
+                            return (
+                                <option>
+                                    {animal.Species} ({animal.Kingdom})
+                                </option>
+                            );
+                        })}
+                    </select>
                 </div>
 
                 <Visualization
@@ -157,6 +157,6 @@ export default class Demo extends Component {
                     {this.state.playing ? "Stop" : "Play"}
                 </button>
             </div>
-        ) : null;
+        );
     }
 }

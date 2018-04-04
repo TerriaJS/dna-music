@@ -17,10 +17,16 @@ const withOctaves = _(notes)
     .flatMap(letter => [letter + "3", letter + "4"])
     .value();
 
+const bassWithOctaves = _(notes)
+    .flatMap(letter => [letter + "2", letter + "2"])
+    .value();
+
 const genes = ["A", "T", "G", "C"];
 const genePairs = _.product(genes, genes).map(arr => arr.join(""));
 
 const lookup = _.zipObject(genePairs, withOctaves);
+
+const bassLookup = _.zipObject(genePairs, bassWithOctaves);
 
 export default class Demo extends Component {
     constructor(props) {
@@ -92,45 +98,28 @@ export default class Demo extends Component {
                                 steps={[4, 12]}
                             />
                         </Sequencer>
-                        <Sequencer resolution={16} bars={32}>
-                            {/* steps={[
-                                        [0, 1, ["c3", "d#3", "g3"]],
-                                        [2, 1, ["c4"]],
-                                        [8, 1, ["c3", "d#3", "g3"]],
-                                        [10, 1, ["c4"]],
-                                        [12, 1, ["c3", "d#3", "g3"]],
-                                        [14, 1, ["d#4"]],
-                                        [16, 1, ["f3", "g#3", "c4"]],
-                                        [18, 1, ["f3", "g#3", "c4"]],
-                                        [24, 1, ["f3", "g#3", "c4"]],
-                                        [26, 1, ["f3", "g#3", "c4"]],
-                                        [28, 1, ["f3", "g#3", "c4"]],
-                                        [30, 1, ["f3", "g#3", "c4"]]
-                                    ]} */}
+                        <Sequencer resolution={16} bars={16}>
                             <Polysynth
-                                steps={this.state.csv
+                                steps={_(this.state.csv)
+                                    .take(128)
                                     .map((pair, index) => {
-                                        if (lookup[pair] === "REST") {
-                                            return null;
-                                        } else {
-                                            return [index * 2, 1, lookup[pair]];
-                                        }
+                                        return [index * 2, 1, lookup[pair]];
                                     })
-                                    .filter(x => !!x)}
+                                    .value()}
                             />
                         </Sequencer>
-                        {/* <Sequencer resolution={16} bars={2}>
+                        <Sequencer resolution={2} bars={2}>
                             <Synth
                                 type="sine"
-                                steps={[
-                                    [0, 8, "c2"],
-                                    [8, 4, "c2"],
-                                    [12, 4, "d#2"],
-                                    [16, 8, "f2"],
-                                    [24, 8, "f1"]
-                                ]}
+                                steps={_(this.state.csv)
+                                    .drop(128)
+                                    .take(4)
+                                    .map((pair, index) => {
+                                        return [index, 1, bassLookup[pair]];
+                                    })
+                                    .value()}
                             />
-                        </Sequencer> */}
+                        </Sequencer>
                     </Analyser>
                 </Song>
 

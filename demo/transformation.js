@@ -44,5 +44,6 @@ export const string2Octave=function(data){
             [createOctave(tone.toLowerCase(),oneStep[tone],oneStep[`${tone}sharp`])]
         ];
     });
+    return mData;
 };
 

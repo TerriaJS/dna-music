@@ -5,10 +5,23 @@ import { Analyser, Song, Sequencer, Sampler, Synth } from "../src";
 import Polysynth from "./polysynth";
 import Visualization from "./visualization";
 import Papa from "papaparse";
+import _ from "lodash";
+import "lodash.product";
 
 import csvUrl from "./sequences.csv";
 
 import "./index.css";
+
+const notes = ["a", "b", "c", "d", "e", "f"];
+const withOctaves = _(notes)
+    .flatMap(letter => [letter + "3", letter + "4"])
+    .value()
+    .concat(["f#3"]);
+
+const genes = ["A", "T", "G", "C"];
+const genePairs = _.product(genes, genes).map(arr => arr.join(""));
+console.log(withOctaves);
+console.log(genePairs);
 
 export default class Demo extends Component {
     constructor(props) {
@@ -30,7 +43,20 @@ export default class Demo extends Component {
             header: true,
             complete: result => {
                 console.log(result);
-                this.setState({ csv: result });
+
+                this.setState({
+                    csv: _(result.data)
+                        .filter(animal => animal.sequence)
+                        .take(50)
+                        .flatMap(animal => animal.sequence.split(""))
+                        .reduce(function(result, value, index, array) {
+                            if (index % 2 === 0)
+                                result.push(array.slice(index, index + 2));
+                            return result;
+                        }, [])
+                        .map(thing => thing.join(""))
+                        .value()
+                });
             }
         });
     }
@@ -47,7 +73,8 @@ export default class Demo extends Component {
         this.setState({ lightMode: !this.state.lightMode });
     }
     render() {
-        return (
+        console.log(this.state.csv);
+        return this.state.csv ? (
             <div
                 style={
                     this.state.lightMode
@@ -62,12 +89,6 @@ export default class Demo extends Component {
                           }
                 }
             >
-                <div>
-                    Result:{" "}
-                    {this.state.csv
-                        ? this.state.csv.toString()
-                        : "Not downloaded"}
-                </div>
                 <Song playing={this.state.playing} tempo={90}>
                     <Analyser onAudioProcess={this.handleAudioProcess}>
                         <Sequencer resolution={16} bars={1}>
@@ -81,21 +102,31 @@ export default class Demo extends Component {
                             />
                         </Sequencer>
                         <Sequencer resolution={16} bars={2}>
+                            {/* steps={[
+                                        [0, 1, ["c3", "d#3", "g3"]],
+                                        [2, 1, ["c4"]],
+                                        [8, 1, ["c3", "d#3", "g3"]],
+                                        [10, 1, ["c4"]],
+                                        [12, 1, ["c3", "d#3", "g3"]],
+                                        [14, 1, ["d#4"]],
+                                        [16, 1, ["f3", "g#3", "c4"]],
+                                        [18, 1, ["f3", "g#3", "c4"]],
+                                        [24, 1, ["f3", "g#3", "c4"]],
+                                        [26, 1, ["f3", "g#3", "c4"]],
+                                        [28, 1, ["f3", "g#3", "c4"]],
+                                        [30, 1, ["f3", "g#3", "c4"]]
+                                    ]} */}
                             <Polysynth
-                                steps={[
-                                    [0, 1, ["c3", "d#3", "g3"]],
-                                    [2, 1, ["c4"]],
-                                    [8, 1, ["c3", "d#3", "g3"]],
-                                    [10, 1, ["c4"]],
-                                    [12, 1, ["c3", "d#3", "g3"]],
-                                    [14, 1, ["d#4"]],
-                                    [16, 1, ["f3", "g#3", "c4"]],
-                                    [18, 1, ["f3", "g#3", "c4"]],
-                                    [24, 1, ["f3", "g#3", "c4"]],
-                                    [26, 1, ["f3", "g#3", "c4"]],
-                                    [28, 1, ["f3", "g#3", "c4"]],
-                                    [30, 1, ["f3", "g#3", "c4"]]
-                                ]}
+                                steps={this.state.csv.map((letter, index) => {
+                                    const noteLookup = {
+                                        A: "a3",
+                                        T: "b3",
+                                        G: "c3",
+                                        C: "d3"
+                                    };
+
+                                    return [index * 2, 1, [noteLookup[letter]]];
+                                })}
                             />
                         </Sequencer>
                         <Sequencer resolution={16} bars={2}>
@@ -147,6 +178,6 @@ export default class Demo extends Component {
                     {this.state.playing ? "Stop" : "Play"}
                 </button>
             </div>
-        );
+        ) : null;
     }
 }

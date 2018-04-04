@@ -23,6 +23,8 @@
   "repository": "https://github.com/FormidableLabs/react-music",
   "dependencies": {
     "audio-contour": "0.0.1",
+    "lodash": "^4.17.5",
+    "lodash.product": "^18.1.16",
     "note-parser": "^2.0.0",
     "papaparse": "^4.3.7",
     "prop-types": "^15.6.0",

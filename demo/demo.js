@@ -12,7 +12,7 @@ import csvUrl from "./sequences.csv";
 
 import "./index.css";
 
-const notes = ["a", "b", "c", "d", "e", "f", "f", "g"];
+const notes = ["a", "b", "c", "d", "e", "f", "REST", "g"];
 const withOctaves = _(notes)
     .flatMap(letter => [letter + "3", letter + "4"])
     .value();
@@ -80,7 +80,7 @@ export default class Demo extends Component {
                           }
                 }
             >
-                <Song playing={this.state.playing} tempo={90}>
+                <Song playing={this.state.playing} tempo={140}>
                     <Analyser onAudioProcess={this.handleAudioProcess}>
                         <Sequencer resolution={16} bars={1}>
                             <Sampler
@@ -108,10 +108,15 @@ export default class Demo extends Component {
                                         [30, 1, ["f3", "g#3", "c4"]]
                                     ]} */}
                             <Polysynth
-                                steps={this.state.csv.map((pair, index) => {
-                                    console.log(lookup[pair]);
-                                    return [index * 2, 1, lookup[pair]];
-                                })}
+                                steps={this.state.csv
+                                    .map((pair, index) => {
+                                        if (lookup[pair] === "REST") {
+                                            return null;
+                                        } else {
+                                            return [index * 2, 1, lookup[pair]];
+                                        }
+                                    })
+                                    .filter(x => !!x)}
                             />
                         </Sequencer>
                         {/* <Sequencer resolution={16} bars={2}>

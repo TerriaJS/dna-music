@@ -53,6 +53,12 @@ export const string2Octave=function(data){
                 }
             }
             steps++;
+            Octaves.push([
+                idx,
+                2,
+                ["REST"]
+            ]);
+            idx++;
             return;
         }
         if(lastChar==''){

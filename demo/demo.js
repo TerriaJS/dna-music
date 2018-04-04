@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { Analyser, Song, Sequencer, Sampler, Synth } from "../src";
+import { Analyser, Song, Sequencer, Sampler, Synth, Monosynth } from "../src";
 
 import Polysynth from "./polysynth";
 import Visualization from "./visualization";
@@ -12,16 +12,15 @@ import csvUrl from "./sequences.csv";
 
 import "./index.css";
 
-const notes = ["a", "b", "c", "d", "e", "f"];
+const notes = ["a", "b", "c", "d", "e", "f", "f", "g"];
 const withOctaves = _(notes)
     .flatMap(letter => [letter + "3", letter + "4"])
-    .value()
-    .concat(["f#3"]);
+    .value();
 
 const genes = ["A", "T", "G", "C"];
 const genePairs = _.product(genes, genes).map(arr => arr.join(""));
-console.log(withOctaves);
-console.log(genePairs);
+
+const lookup = _.zipObject(genePairs, withOctaves);
 
 export default class Demo extends Component {
     constructor(props) {
@@ -42,19 +41,11 @@ export default class Demo extends Component {
             download: true,
             header: true,
             complete: result => {
-                console.log(result);
-
                 this.setState({
                     csv: _(result.data)
                         .filter(animal => animal.sequence)
-                        .take(50)
-                        .flatMap(animal => animal.sequence.split(""))
-                        .reduce(function(result, value, index, array) {
-                            if (index % 2 === 0)
-                                result.push(array.slice(index, index + 2));
-                            return result;
-                        }, [])
-                        .map(thing => thing.join(""))
+                        .take(10)
+                        .flatMap(animal => animal.sequence.match(/.{1,2}/g))
                         .value()
                 });
             }
@@ -101,7 +92,7 @@ export default class Demo extends Component {
                                 steps={[4, 12]}
                             />
                         </Sequencer>
-                        <Sequencer resolution={16} bars={2}>
+                        <Sequencer resolution={16} bars={32}>
                             {/* steps={[
                                         [0, 1, ["c3", "d#3", "g3"]],
                                         [2, 1, ["c4"]],
@@ -117,19 +108,13 @@ export default class Demo extends Component {
                                         [30, 1, ["f3", "g#3", "c4"]]
                                     ]} */}
                             <Polysynth
-                                steps={this.state.csv.map((letter, index) => {
-                                    const noteLookup = {
-                                        A: "a3",
-                                        T: "b3",
-                                        G: "c3",
-                                        C: "d3"
-                                    };
-
-                                    return [index * 2, 1, [noteLookup[letter]]];
+                                steps={this.state.csv.map((pair, index) => {
+                                    console.log(lookup[pair]);
+                                    return [index * 2, 1, lookup[pair]];
                                 })}
                             />
                         </Sequencer>
-                        <Sequencer resolution={16} bars={2}>
+                        {/* <Sequencer resolution={16} bars={2}>
                             <Synth
                                 type="sine"
                                 steps={[
@@ -140,7 +125,7 @@ export default class Demo extends Component {
                                     [24, 8, "f1"]
                                 ]}
                             />
-                        </Sequencer>
+                        </Sequencer> */}
                     </Analyser>
                 </Song>
 

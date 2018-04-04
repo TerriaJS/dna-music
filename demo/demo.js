@@ -41,6 +41,15 @@ export default class Demo extends Component {
         this.handlePlayToggle = this.handlePlayToggle.bind(this);
     }
 
+    getEffect() {
+        switch (this.state.animal.Kingdom) {
+            case "fungi":
+                return "PingPong";
+            default:
+                return "Chorus";
+        }
+    }
+
     componentDidMount() {
         Papa.parse(csvUrl, {
             download: true,
@@ -63,7 +72,8 @@ export default class Demo extends Component {
 
     setAnimal(animalIndex) {
         this.setState({
-            playing: false
+            playing: false,
+            animal: this.state.animals[animalIndex]
         });
 
         setTimeout(() => {
@@ -92,6 +102,7 @@ export default class Demo extends Component {
 
         return (
             <div>
+                <h1>Funky Fungi!!!</h1>
                 {this.state.music ? (
                     <Song playing={this.state.playing} tempo={140}>
                         <Analyser onAudioProcess={this.handleAudioProcess}>
@@ -110,6 +121,7 @@ export default class Demo extends Component {
                                 bars={Math.ceil(treble.length / 8)}
                             >
                                 <Polysynth
+                                    effect={this.getEffect()}
                                     steps={treble.map((pair, index) => {
                                         return [index * 2, 1, lookup[pair]];
                                     })}

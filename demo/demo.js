@@ -7,7 +7,7 @@ import Visualization from "./visualization";
 import Papa from "papaparse";
 
 import csvUrl from "./sequences.csv";
-import {string2Octave} from "./transformation";
+import {string2Octave} from "./transformation2";
 
 import "./index.css";
 
@@ -30,7 +30,6 @@ export default class Demo extends Component {
             download: true,
             header: true,
             complete: result => {
-                console.log(result);
                 this.setState({ csv: result });
             }
         });
@@ -49,11 +48,10 @@ export default class Demo extends Component {
     }
     render() {
         if(!this.state.csv || !this.state.csv.data) return null;
-        const mData = string2Octave(this.state.csv.data.slice(0,2).reduce(function(prev,item){
+        const mData = string2Octave(this.state.csv.data.slice(0,50).reduce(function(prev,item){
             prev+=item['sequence'];
             return prev;
         },""));
-        console.log(mData);
         return (
             <div
                 style={

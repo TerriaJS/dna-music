@@ -113,10 +113,12 @@ export default class Demo extends Component {
                         <Analyser onAudioProcess={this.handleAudioProcess}>
                             <Sequencer resolution={16} bars={1}>
                                 <Sampler
+                                    gain={0.7}
                                     sample="samples/kick.wav"
                                     steps={[0, 2, 8, 10]}
                                 />
                                 <Sampler
+                                    gain={0.3}
                                     sample="samples/snare.wav"
                                     steps={[4, 12]}
                                 />
@@ -128,13 +130,14 @@ export default class Demo extends Component {
                                 <Polysynth
                                     effect={this.getEffect()}
                                     steps={treble.map((pair, index) => {
-                                        return [index * 2, 1, lookup[pair]];
+                                        return [index * 2, 1, [lookup[pair], lookup[pair]]];
                                     })}
                                 />
                             </Sequencer>
                             <Sequencer resolution={2} bars={2}>
                                 <Synth
                                     type="sine"
+                                    gain={1}
                                     steps={_(this.state.music)
                                         .take(4)
                                         .map((pair, index) => {
